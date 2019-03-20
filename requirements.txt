@@ -1,3 +1,4 @@
+IPython
 requests
 matplotlib
 numpy
