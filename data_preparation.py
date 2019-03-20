@@ -111,7 +111,7 @@ def get_remote_files_from_index(url):
 def main():
     bike_points_url = "https://api.tfl.gov.uk/bikepoint"
     index_url = "https://cycling.data.tfl.gov.uk/usage-stats/cycling-load.json"
-    pickle_file = "data/trips.pkl"
+    output_file = "data/trips.csv"
     raw_trip_dir = "data/raw_trip"
 
     if not os.path.exists(raw_trip_dir):
@@ -125,7 +125,7 @@ def main():
     remote_files = get_remote_files_from_index(index_url)
     data_files = list(download_data_files(remote_files, raw_trip_dir))
     trip_data = load_data(data_files)
-    trip_data.to_pickle(pickle_file)
+    trip_data.to_csv(output_file)
 
     print(trip_data.head(10))
 
