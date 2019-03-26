@@ -1,11 +1,15 @@
 import calendar
 import json
 import os
+import time
 import traceback
 from datetime import datetime
 
 import pandas as pd
 import requests
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql import types as T
 
 
 def download_bike_stations(url):
@@ -79,7 +83,7 @@ def explode_date(df, date_field, prefix):
     return df
 
 
-def load_data(data_files):
+def load_data_old(data_files):
     files = [f for f in data_files]
     dfs = []
 
@@ -102,20 +106,60 @@ def load_data(data_files):
     return pd.concat(dfs, axis=0, ignore_index=True)
 
 
+def load_data(data_dir):
+    schema = T.StructType([
+        T.StructField("Rental Id",          T.IntegerType(),    False),
+        T.StructField("Duration",           T.IntegerType(),    False),
+        T.StructField("Bike Id",            T.IntegerType(),    False),
+        T.StructField("End Date",           T.StringType(),     False),
+        T.StructField("EndStation Id",      T.LongType(),       False),
+        T.StructField("EndStation Name",    T.StringType(),     False),
+        T.StructField("Start Date",         T.StringType(),     False),
+        T.StructField("StartStation Id",    T.LongType(),       False),
+        T.StructField("StartStation Name",  T.StringType(),     False)
+    ])
+
+    df = spark.read.csv(
+        path="{0}/*.csv".format(data_dir),
+        header=True,
+        schema=schema,
+        mode="DROPMALFORMED"
+    )
+
+    df = df.withColumnRenamed("Rental Id", "rental_id")\
+        .withColumnRenamed("Duration", "duration")\
+        .withColumnRenamed("Bike Id", "bike_id")\
+        .withColumnRenamed("End Date", "end_date")\
+        .withColumnRenamed("EndStation Id", "end_station_id")\
+        .withColumnRenamed("EndStation Name", "end_station_name")\
+        .withColumnRenamed("Start Date", "start_date")\
+        .withColumnRenamed("StartStation Id", "start_station_id")\
+        .withColumnRenamed("StartStation Name", "start_station_name")
+
+    return df
+
+
 def get_remote_files_from_index(url):
     file_list_json = json.loads(requests.get(url).content)
     urls = [f["url"] for f in file_list_json["entries"]]
     return [f.replace("s3:", "https:") for f in urls if f.endswith("csv")]
 
 
+def filter_data(trip_data):
+    return trip_data.where(F.col("Duration") > 0)
+
+
 def main():
     bike_points_url = "https://api.tfl.gov.uk/bikepoint"
     index_url = "https://cycling.data.tfl.gov.uk/usage-stats/cycling-load.json"
-    output_file = "data/trips.csv"
+    output_dir = "data/parquet"
     raw_trip_dir = "data/raw_trip"
 
     if not os.path.exists(raw_trip_dir):
         os.makedirs(raw_trip_dir)
+
+    if os.path.exists(output_dir):
+        os.removedirs(output_dir)
 
     bike_stations = download_bike_stations(bike_points_url)
 
@@ -123,12 +167,30 @@ def main():
     print(bike_stations)
 
     remote_files = get_remote_files_from_index(index_url)
-    data_files = list(download_data_files(remote_files, raw_trip_dir))
-    trip_data = load_data(data_files)
-    trip_data.to_csv(output_file)
+    download_data_files(remote_files, raw_trip_dir)
 
-    print(trip_data.head(10))
+    trip_data = load_data(raw_trip_dir)
+    trip_data = filter_data(trip_data)
+    # trip_data.to_csv(output_file)
+
+    # 23464034
+    # 23293614
+    print("Rows: " + str(trip_data.count()))
+    trip_data.limit(10).show()
+    trip_data.write.parquet(output_dir)
 
 
 if __name__ == "__main__":
+    spark = (
+        SparkSession.builder
+            .master("local")
+            .appName("TFL Data Prep")
+            .config("spark.executor.memory", "4g")
+            .getOrCreate()
+    )
+
+    start = time.time()
     main()
+
+    end = time.time()
+    print("Data prep took {0:06.2f}s".format(end - start))
