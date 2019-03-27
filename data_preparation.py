@@ -37,20 +37,6 @@ def download_bike_stations(url):
     return pd.DataFrame(data, columns=cols)
 
 
-def download_data_files(remote_files, cache_dir):
-    for url in remote_files:
-        filename = cache_dir + '/' + url.split('/')[-1].replace(' ', '_')
-
-        if os.path.isfile(filename):
-            print("File already downloaded: " + filename)
-        else:
-            print("Downloading file: " + filename)
-            r = requests.get(url, allow_redirects=True)
-            open(filename, 'wb').write(r.content)
-
-        yield filename
-
-
 def load_data(data_dir):
     schema = T.StructType([
         T.StructField("Rental Id",          T.IntegerType(),    False),
@@ -105,25 +91,14 @@ def explode_date_str(df, input_field, prefix):
     return df
 
 
-def get_remote_files_from_index(url):
-    file_list_json = json.loads(requests.get(url).content)
-    urls = [f["url"] for f in file_list_json["entries"]]
-    return [f.replace("s3:", "https:") for f in urls if f.endswith("csv")]
-
-
 def filter_data(trip_data):
     return trip_data.where(F.col("Duration") > 0)
 
 
 def main():
     bike_points_url = "https://api.tfl.gov.uk/bikepoint"
-    # NOTE:  Looks like this index file is not complete :(
-    index_url = "https://cycling.data.tfl.gov.uk/usage-stats/cycling-load.json"
     output_dir = "data/parquet_trip"
     raw_trip_dir = "data/raw_trip"
-
-    if not os.path.exists(raw_trip_dir):
-        os.makedirs(raw_trip_dir)
 
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
@@ -131,9 +106,6 @@ def main():
     bike_stations = download_bike_stations(bike_points_url)
     print("Loaded bike stations:")
     print(bike_stations)
-
-    remote_files = get_remote_files_from_index(index_url)
-    download_data_files(remote_files, raw_trip_dir)
 
     trip_data = load_data(raw_trip_dir)
     trip_data = filter_data(trip_data)
