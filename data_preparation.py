@@ -1,40 +1,10 @@
-import json
 import os
 import shutil
 import time
 
-import pandas as pd
-import requests
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
-
-
-def download_bike_stations(url):
-    response = requests.get(url)
-    parsed = json.loads(response.content)
-    data = []
-    for p in parsed:
-        bp_id = int(p["id"].replace("BikePoints_", ""))
-        name = p["commonName"]
-        latitude = p["lat"]
-        longitude = p["lon"]
-        num_docks = 0
-        num_bikes = 0
-        num_empty = 0
-
-        for x in p["additionalProperties"]:
-            if x["key"] == "NbDocks":
-                num_docks = x["value"]
-            if x["key"] == "NbBikes":
-                num_bikes = x["value"]
-            if x["key"] == "NbEmptyDocks":
-                num_empty = x["value"]
-
-        data.append([bp_id, name, latitude, longitude, num_docks, int(num_bikes), num_empty])
-
-    cols = ['id', 'name', 'latitude', 'longitude', 'num_docks', 'num_bikes', 'num_empty']
-    return pd.DataFrame(data, columns=cols)
 
 
 def load_data(data_dir):
@@ -96,16 +66,11 @@ def filter_data(trip_data):
 
 
 def main():
-    bike_points_url = "https://api.tfl.gov.uk/bikepoint"
     output_dir = "data/parquet_trip"
     raw_trip_dir = "data/raw_trip"
 
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
-
-    bike_stations = download_bike_stations(bike_points_url)
-    print("Loaded bike stations:")
-    print(bike_stations)
 
     trip_data = load_data(raw_trip_dir)
     trip_data = filter_data(trip_data)
