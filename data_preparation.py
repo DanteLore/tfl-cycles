@@ -1,10 +1,7 @@
-import calendar
 import json
 import os
 import shutil
 import time
-import traceback
-from datetime import datetime
 
 import pandas as pd
 import requests
@@ -68,14 +65,14 @@ def load_data(data_dir):
     ])
 
     df = spark.read.csv(
-        #path="{0}/1a.JourneyDataExtract04Jan15-17Jan15.csv".format(data_dir),
         path="{0}/*.csv".format(data_dir),
         header=True,
         schema=schema,
         mode="DROPMALFORMED"
     )
 
-    df = df.withColumnRenamed("Rental Id", "rental_id")\
+    df = df\
+        .withColumnRenamed("Rental Id", "rental_id")\
         .withColumnRenamed("Duration", "duration")\
         .withColumnRenamed("Bike Id", "bike_id")\
         .withColumnRenamed("End Date", "end_date")\
@@ -120,6 +117,7 @@ def filter_data(trip_data):
 
 def main():
     bike_points_url = "https://api.tfl.gov.uk/bikepoint"
+    # NOTE:  Looks like this index file is not complete :(
     index_url = "https://cycling.data.tfl.gov.uk/usage-stats/cycling-load.json"
     output_dir = "data/parquet_trip"
     raw_trip_dir = "data/raw_trip"
@@ -130,22 +128,19 @@ def main():
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
-    #bike_stations = download_bike_stations(bike_points_url)
-    #print("Loaded bike stations:")
-    #print(bike_stations)
+    bike_stations = download_bike_stations(bike_points_url)
+    print("Loaded bike stations:")
+    print(bike_stations)
 
-    #remote_files = get_remote_files_from_index(index_url)
-    #download_data_files(remote_files, raw_trip_dir)
+    remote_files = get_remote_files_from_index(index_url)
+    download_data_files(remote_files, raw_trip_dir)
 
     trip_data = load_data(raw_trip_dir)
     trip_data = filter_data(trip_data)
-    # trip_data.to_csv(output_file)
+    trip_data.write.parquet(output_dir)
 
-    # 23464034
-    # 23293614
     print("Rows: " + str(trip_data.count()))
     trip_data.limit(10).show()
-    trip_data.write.parquet(output_dir)
 
 
 if __name__ == "__main__":
