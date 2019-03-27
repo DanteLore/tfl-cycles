@@ -15,7 +15,7 @@ def download_file(url, filename):
 
 
 def read_index(index_file):
-    with open(INDEX_FILE) as fd:
+    with open(index_file) as fd:
         doc = xmltodict.parse(fd.read())
 
     pattern = re.compile("^usage-stats/.*csv$")
