@@ -21,8 +21,7 @@ def read_index(index_file):
     pattern = re.compile("^usage-stats/.*csv$")
 
     entries = [item['Key'] for item in doc['ListBucketResult']['Contents']]
-    files = [file for file in entries if pattern.match(file)]
-    return files
+    return [f for f in entries if pattern.match(f)]
 
 
 if __name__ == "__main__":
@@ -37,8 +36,8 @@ if __name__ == "__main__":
 
     files = read_index(INDEX_FILE)
 
-    for f in files:
-        local_file = RAW_TRIP_DIR + f.split('/')[-1].replace(' ', '_')
-        url = BUCKET_URL + f
+    for file in files:
+        local_file = RAW_TRIP_DIR + file.split('/')[-1].replace(' ', '_')
+        url = BUCKET_URL + file
 
         download_file(url, local_file)

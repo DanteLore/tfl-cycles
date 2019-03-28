@@ -24,7 +24,7 @@ def load_data(data_dir):
         path="{0}/*.csv".format(data_dir),
         header=True,
         schema=schema,
-        mode="DROPMALFORMED"
+        mode="PERMISSIVE"
     )
 
     df = df\
