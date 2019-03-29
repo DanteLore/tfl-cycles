@@ -30,3 +30,8 @@ Note that parquet data is deleted and recreated each time `prepare-trip-data.py`
 You can host these inside PyCharm, which is handy
 
 https://www.jetbrains.com/help/pycharm/using-ipython-notebook-with-product.html
+
+### Maps
+
+https://towardsdatascience.com/lets-make-a-map-using-geopandas-pandas-and-matplotlib-to-make-a-chloropleth-map-dddc31c1983d
+

@@ -1,3 +1,5 @@
+shapely
+pyproj
 xmltodict
 pyspark
 IPython
@@ -6,3 +8,5 @@ matplotlib
 numpy
 pandas
 seaborn
+descartes
+geopandas

@@ -26,8 +26,8 @@ def read_index(index_file):
 
 if __name__ == "__main__":
     BUCKET_URL = "https://s3-eu-west-1.amazonaws.com/cycling.data.tfl.gov.uk/"
-    INDEX_FILE = "data/file-index.xml"
-    RAW_TRIP_DIR = "data/raw_trip/"
+    INDEX_FILE = "../data/file-index.xml"
+    RAW_TRIP_DIR = "../data/raw_trip/"
 
     if not os.path.exists(RAW_TRIP_DIR):
         os.makedirs(RAW_TRIP_DIR)
