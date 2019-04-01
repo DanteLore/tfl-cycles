@@ -4,7 +4,6 @@ import re
 import requests
 import xmltodict
 
-
 def download_file(url, filename):
     if os.path.isfile(filename):
         print("File already downloaded: " + filename)

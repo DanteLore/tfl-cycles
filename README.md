@@ -34,4 +34,5 @@ https://www.jetbrains.com/help/pycharm/using-ipython-notebook-with-product.html
 ### Maps
 
 https://towardsdatascience.com/lets-make-a-map-using-geopandas-pandas-and-matplotlib-to-make-a-chloropleth-map-dddc31c1983d
-
+https://towardsdatascience.com/geopandas-101-plot-any-data-with-a-latitude-and-longitude-on-a-map-98e01944b972
+http://michelleful.github.io/code-blog/2015/07/15/making-maps/
