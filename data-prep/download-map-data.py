@@ -14,7 +14,8 @@ def download_file(url, filename):
 
 if __name__ == "__main__":
     MAP_DIR = "../data/maps/"
-    MAP_DATA_URL = "https://data.london.gov.uk/download/statistical-gis-boundary-files-london/9ba8c833-6370-4b11-abdc-314aa020d5e0/statistical-gis-boundaries-london.zip"
+    MAP_DATA_URL = "https://data.london.gov.uk/download/statistical-gis-boundary-files-london/" \
+                   "9ba8c833-6370-4b11-abdc-314aa020d5e0/statistical-gis-boundaries-london.zip "
 
     if not os.path.exists(MAP_DIR):
         os.makedirs(MAP_DIR)
