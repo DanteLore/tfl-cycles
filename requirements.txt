@@ -12,3 +12,4 @@ descartes
 geopandas
 googlemaps
 keyring
+polyline
