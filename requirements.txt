@@ -10,3 +10,5 @@ pandas
 seaborn
 descartes
 geopandas
+googlemaps
+keyring
