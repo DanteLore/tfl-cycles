@@ -66,14 +66,15 @@ def filter_data(trip_data):
 
 
 def main():
-    output_dir = "data/parquet_trip"
-    raw_trip_dir = "data/raw_trip"
+    output_dir = "../data/parquet_trip"
+    raw_trip_dir = "../data/raw_trip"
 
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
     trip_data = load_data(raw_trip_dir)
     trip_data = filter_data(trip_data)
+    trip_data = trip_data.dropDuplicates()
     trip_data.write.parquet(output_dir)
 
     print("Rows: " + str(trip_data.count()))
