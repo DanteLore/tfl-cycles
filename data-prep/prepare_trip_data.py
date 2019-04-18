@@ -62,7 +62,10 @@ def explode_date_str(df, input_field, prefix):
 
 
 def filter_data(trip_data):
-    return trip_data.where(F.col("Duration") > 0)
+    return (trip_data
+                .where(F.col("Duration") > 0)
+                .dropDuplicates()
+            )
 
 
 def main():
@@ -74,7 +77,6 @@ def main():
 
     trip_data = load_data(raw_trip_dir)
     trip_data = filter_data(trip_data)
-    trip_data = trip_data.dropDuplicates()
     trip_data.write.parquet(output_dir)
 
     print("Rows: " + str(trip_data.count()))
